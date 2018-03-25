@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'sinatra/base'
 require 'sinatra/redis'
 require 'sinatra/activerecord'
@@ -41,6 +42,7 @@ module Sinatra
 
       def shopify_session(&blk)
         return_to = request.env['sinatra.route'].split(' ').last
+        return_to << (params_to_query(params))
 
         if !session.key?(:shopify)
           authenticate(return_to)
@@ -98,6 +100,23 @@ module Sinatra
       def activate_shopify_api(shop_name, token)
         api_session = ShopifyAPI::Session.new(shop_name, token)
         ShopifyAPI::Base.activate_session(api_session)
+      end
+
+      def params_to_query params
+        filter = [
+          'hmac',
+          'shop',
+          'timestamp',
+          'locale',
+          'protocol'
+        ]
+        query = "?"
+        params.each do |k,v|
+          unless filter.include? k.to_s
+            query << "#{k}=#{v}&"
+          end
+        end
+        query
       end
 
       def clear_session(shop)
