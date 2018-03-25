@@ -42,7 +42,7 @@ module Sinatra
 
       def shopify_session(&blk)
         return_to = request.env['sinatra.route'].split(' ').last
-        return_to << (params_to_query(params))
+        return_to << (params_to_query(params)) if return_to == '/print_sl'
 
         if !session.key?(:shopify)
           authenticate(return_to)
